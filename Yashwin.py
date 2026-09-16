@@ -1,21 +1,74 @@
-# Tasks Assigned: File Creating, Parsing, Handling white spaces/indentation, Line and In-line comments.
-
-# Importing necessary modules
-import Keerty
-import Pearl
+def clean_line(line):
+    line = line.split("//")[0]
+    return line.strip()
 
 
-# Create a file to check your code. You can take a code from the PPT itself as provided by the professor as file.asm
+def parse_line(line):
+    line = clean_line(line)
 
-# Reading the file as raw_code.asm
+    if not line:
+        return None
 
-# Function to read the white spaces, what you need to do - Ignore it.!
+    if line.startswith("(") and line.endswith(")"):
+        return {
+            "type": "L",
+            "symbol": line[1:-1].strip()
+        }
 
-# Function to Handle Line and In-Line comments. Your choice if you want to make one function or two.
+    if line.startswith("@"):
+        return {
+            "type": "A",
+            "value": line[1:].strip()
+        }
 
-# Two Functions for Command Iteration: hasMoreCommands and advance
+    dest = ""
+    comp_jump = line
+    jump = ""
 
-# Function to Identify Command Type for the current line
+    if ";" in comp_jump:
+        comp_jump, jump = comp_jump.split(";", 1)
 
-# Function to isolate and return symbol or decimal value
+    if "=" in comp_jump:
+        dest, comp = comp_jump.split("=", 1)
+    else:
+        comp = comp_jump
 
+    return {
+        "type": "C",
+        "dest": dest.strip(),
+        "comp": comp.strip(),
+        "jump": jump.strip()
+    }
+
+
+def main():
+    with open("input1.asm", "r") as file:
+        line_number = 0
+
+        for line in file:
+            line_number += 1
+            result = parse_line(line)
+
+            if result is None:
+                continue
+
+            print("Line:", line_number)
+
+            if result["type"] == "A":
+                print("Type: A-instruction")
+                print("Value:", result["value"])
+
+            elif result["type"] == "L":
+                print("Type: Label")
+                print("Symbol:", result["symbol"])
+
+            else:
+                print("Type: C-instruction")
+                print("Dest:", result["dest"])
+                print("Comp:", result["comp"])
+                print("Jump:", result["jump"])
+
+            print()
+
+
+main()
